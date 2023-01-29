@@ -7,19 +7,15 @@ from datetime import date as dt
 today = str(dt.today())
 
 
-def download_csv(jsonFilePath, csvFilePath) -> dict:
-    url = f'https://griddata.elia.be/eliabecontrols.prod/interface/fdn/download/availableenergy/volumelevelprice?type=csv&day={today}&csrt=16474748864209014386'
+def download_xls(xlsFilePath) -> dict:
+    url = f'https://griddata.elia.be/eliabecontrols.prod/interface/fdn/download/availableenergy/volumelevelprice?type=xls&day={today}&csrt=16474748864209014386'
 
     response = requests.get(url)
     if response.status_code == 200:
-        with open(csvFilePath, "w", encoding='utf-8') as f:
-            f.write(response.text.replace(',', '.'))
+        with open(xlsFilePath, "wb") as f:
+            f.write(response.content)
     else:
         print('something went wrong!', response.status_code)
-
-    output = csv_to_json(csvFilePath, jsonFilePath)
-
-    return output
 
 
 def csv_to_json(csvFilePath, jsonFilePath) -> dict:
@@ -45,29 +41,41 @@ def csv_to_json(csvFilePath, jsonFilePath) -> dict:
 
 def json_to_csv(jsonObject, csvFilePath):
     headers = [
-        'System imbalance forecast',
-        'Input data availability',
-        'Probability in [-400,-200]',
         'Prediction Datetime',
-        'Probability in [400,inf]',
-        'Probability in [-inf,-400]',
-        'Probability in [-200,0]',
         'Resolution code',
         'Quarter hour',
+        'Input data availability',
+        'System imbalance forecast',
+        'Probability in [-inf,-400]',
+        'Probability in [-400,-200]',
+        'Probability in [-200,0]',
         'Probability in [0,200]',
-        'Probability in [200,400]'
+        'Probability in [200,400]',
+        'Probability in [400,inf]'
     ]
 
-    # Create CSV with the coded headers and discard JSON headers
-    with open(csvFilePath, 'w') as csvfile:
-        writer = csv.writer(csvfile)
+    with open(csvFilePath, 'w') as csvf:
+        writer = csv.writer(csvf)
         count = 0
         for row in jsonObject:
             if count == 0:
                 writer.writerow(headers)
                 count += 1
 
-            writer.writerow(row.values())
+            data = {
+                "prediction_datetime": row['predictiontimeutc'],
+                "resolution_code": row['resolutioncode'],
+                "quater_hour": row['predictions_forecastedtimeutc'],
+                "input_data_availability": row['predictionquality'],
+                "system_imbalance_forecast": row['predictions_silinearregressionforecast'],
+                "probability_in_min_inf_min_400": row['predictions_categoricalsiprediction_from_minus_inf_to_minus_400'],
+                "probability_in_min_400_min_200": row['predictions_categoricalsiprediction_from_minus_400_to_minus_200'],
+                "probability_in_min_200_0": row['predictions_categoricalsiprediction_from_minus_200_to_0'],
+                "probability_in_0_200": row['predictions_categoricalsiprediction_from_0_to_200'],
+                "probability_in_200_400": row['predictions_categoricalsiprediction_from_200_to_400'],
+                "probability_in_400_inf": row['predictions_categoricalsiprediction_from_400_to_inf']
+            }
+            writer.writerow(data.values())
 
     print("CSV created!!")
 
@@ -98,3 +106,19 @@ def json_to_csv_078(jsonObject, csvFilePath):
             writer.writerow(row.values())
 
     print('CSV created!!')
+
+
+def csv_to_json_sam(csvFilePath) -> dict:
+    jsonArray = []
+
+    # read csv file
+    with open(csvFilePath, encoding='utf-8') as csvf:
+        # load csv file data using csv library's dictionary reader
+        csvReader = csv.DictReader(csvf)
+
+        # convert each csv row into python dict
+        for row in csvReader:
+            # add this python dict to json array
+            jsonArray.append({today: row})
+
+    return jsonArray
