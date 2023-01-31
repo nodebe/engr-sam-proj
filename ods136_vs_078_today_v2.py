@@ -91,16 +91,16 @@ def clearing_balancing_energy_market(block_offer_up, block_offer_down, block_cos
     return Price_Imb
 
 
-def load_SI_data(Path_excel_file, day, skip):
+def load_SI_data(Path_excel_file, day, skip, dataset_id):
     be = pd.read_csv(Path_excel_file)
 
     # be1 = be['Prediction Datetime;Resolution code;Quarter hour;Input data availability;System imbalance forecast;Probability in [-inf']
     # be1 = be1.str.split(';', 20, expand=True)
     be.columns = ['Prediction Datetime', 'Resolution code', 'Quarter hour', 'Input data availability', 'System imbalance forecast', 'Probability in [-inf,-400]',
                   'Probability in [-400,-200]', 'Probability in [-200,0]', 'Probability in [0,200]', 'Probability in [200,400]', 'Probability in [400,inf]']
-    be.to_csv('new_ods136.csv', index=False)
+    be.to_csv(f'new_{dataset_id}.csv', index=False)
 
-    Path = pd.read_csv('new_ods136.csv')
+    Path = pd.read_csv(f'new_{dataset_id}.csv')
     bee = Path['Prediction Datetime'].str.split('T', 1, expand=True)
     b = bee[0].str.split('-', 3, expand=True)
     bee1 = bee[1].str.split('+', 1, expand=True)
@@ -179,7 +179,7 @@ def load_ARC_data(Path_csv_file, lengt, day, skip):
     return file_ARC_data.head(lengt)
 
 
-def main_program():
+def main_program_136(dataset_id):
     print('Started running...')
     global li1, li2, li3, li4, li5, li6, rms, rms1, rms2, rms3, rms4, rms5, final, final1, final2, day_run2, summmary
     li1 = []
@@ -196,13 +196,13 @@ def main_program():
 
     qua_end = 0
 
-    Path_csv_SI = 'inputs/volume_ods136.csv'
+    Path_csv_SI = f'inputs/volume_{dataset_id}.csv'
 
     Path_csv_ARC = 'inputs/avail_energy_bal_price.xls'
 
     # Loading data in dataframes
 
-    Pandas_SI_Data, le = load_SI_data(Path_csv_SI, ma, qua_end)
+    Pandas_SI_Data, le = load_SI_data(Path_csv_SI, ma, qua_end, dataset_id)
     Pandas_ARC_Data = load_ARC_data(Path_csv_ARC, le, ma, qua_end)
 
     for index_data in Pandas_SI_Data.index:
@@ -220,7 +220,7 @@ def main_program():
         li1.append(Price_Imb)
         li2.append(index_data)
 
-    Path = pd.read_csv('new_ods136.csv')
+    Path = pd.read_csv(f'new_{dataset_id}.csv')
     bee = Path['Prediction Datetime'].str.split('T', 1, expand=True)
     b = bee[0].str.split('-', 3, expand=True)
     bee1 = bee[1].str.split('+', 1, expand=True)
@@ -276,7 +276,7 @@ def main_program():
     qua_end = 10
 
     # Loading data in dataframes
-    Pandas_SI_Data, le = load_SI_data(Path_csv_SI, ma, qua_end)
+    Pandas_SI_Data, le = load_SI_data(Path_csv_SI, ma, qua_end, dataset_id)
     Pandas_ARC_Data = load_ARC_data(Path_csv_ARC, le, ma, qua_end)
 
     for index_data in Pandas_SI_Data.index:
@@ -294,7 +294,7 @@ def main_program():
         li3.append(Price_Imb)
         li4.append(index_data)
 
-    Path = pd.read_csv('new_ods136.csv')
+    Path = pd.read_csv(f'new_{dataset_id}.csv')
     bee = Path['Prediction Datetime'].str.split('T', 1, expand=True)
     b = bee[0].str.split('-', 3, expand=True)
     bee1 = bee[1].str.split('+', 1, expand=True)
@@ -351,7 +351,7 @@ def main_program():
     qua_end = 5
 
     # Loading data in dataframes
-    Pandas_SI_Data, le = load_SI_data(Path_csv_SI, ma, qua_end)
+    Pandas_SI_Data, le = load_SI_data(Path_csv_SI, ma, qua_end, dataset_id)
     Pandas_ARC_Data = load_ARC_data(Path_csv_ARC, le, ma, qua_end)
 
     for index_data in Pandas_SI_Data.index:
@@ -369,7 +369,7 @@ def main_program():
         li5.append(Price_Imb)
         li6.append(index_data)
 
-    Path = pd.read_csv('new_ods136.csv')
+    Path = pd.read_csv(f'new_{dataset_id}.csv')
     bee = Path['Prediction Datetime'].str.split('T', 1, expand=True)
     b = bee[0].str.split('-', 3, expand=True)
     bee1 = bee[1].str.split('+', 1, expand=True)
@@ -533,7 +533,7 @@ def main_program():
 
 
 if __name__ == '__main__':
-    main_program()
+    main_program_136('ods136')
 
 # def generate_figs():
 #     fig = make_subplots(rows=3,

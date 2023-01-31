@@ -25,7 +25,7 @@ def get_records(dataset_id='ods078'):
 def system_imbalance_forecast(dataset_id='ods136'):
     begin_time = date.today()
     end_time = dt.now().strftime('%Y-%m-%dT%H:%M')
-    csvFilePath = f'inputs/volume_ods136.csv'
+    csvFilePath = f'inputs/volume_{dataset_id}.csv'
 
     url = f'https://opendata.elia.be/api/records/1.0/search/?dataset={dataset_id}&q=predictiontimeutc%3A[{begin_time}+TO+{end_time}]&rows=1500&sort=predictiontimeutc&facet=predictiontimeutc&facet=resolutioncode&facet=predictions_forecastedtimeutc'
 
